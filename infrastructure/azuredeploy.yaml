@@ -61,6 +61,7 @@ resources:
         properties:
           AzureWebJobsDashboard: "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storage_account_name'),';AccountKey=',listKeys(variables('storage_account_id'), variables('storage_api_version')).keys[0].value,';')]"
           AzureWebJobsStorage: "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storage_account_name'),';AccountKey=',listKeys(variables('storage_account_id'), variables('storage_api_version')).keys[0].value,';')]"
+          STORAGE_CONNECTION: "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storage_account_name'),';AccountKey=',listKeys(variables('storage_account_id'), variables('storage_api_version')).keys[0].value,';')]"
           FUNCTIONS_EXTENSION_VERSION: "latest"
         apiVersion: "2016-03-01"
         dependsOn:

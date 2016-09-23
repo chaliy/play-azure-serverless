@@ -1,7 +1,11 @@
 .PHONY: all
 
 package-simple:
-	zip -r simple simple/*
+	zip -r functions simple/*
 
-publish-simple: package-simple
-	curl -u ${PLAY_AZURE_SERVERLESS_FUNCTIONS_USER}:${PLAY_AZURE_SERVERLESS_FUNCTIONS_PASSWORD} -X PUT -k -T simple.zip https://play-azure-serverless-functions.scm.azurewebsites.net/api/zip/site/wwwroot
+package-resizee:
+	zip -r functions resizee/*
+
+publish:
+	curl -u ${PLAY_AZURE_SERVERLESS_FUNCTIONS_USER}:${PLAY_AZURE_SERVERLESS_FUNCTIONS_PASSWORD} -X PUT -k -T functions.zip https://play-azure-serverless-functions.scm.azurewebsites.net/api/zip/site/wwwroot
+	rm *.zip
