@@ -1,0 +1,106 @@
+$schema: http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#
+contentVersion: "1.0.0.0"
+parameters:
+  name:
+    type: string
+    defaultValue: play-azure-serverless
+
+variables:
+  name: "[parameters('name')]"
+  service_plan_name: "[concat(variables('name'), '-farm')]"
+  service_plan_id: "[resourceId('Microsoft.Web/serverfarms', variables('service_plan_name'))]"
+  storage_account_name: "[replace(variables('name'),'-','')]"
+  storage_account_id: "[resourceId('Microsoft.Storage/storageAccounts', variables('storage_account_name'))]"
+  func_app_name: "[concat(variables('name'), '-functions')]"
+  func_app_id: "[resourceId('Microsoft.Web/sites', variables('func_app_name'))]"
+
+  storage_api_version: "[providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]]"
+
+resources:
+  -
+    type: "Microsoft.Web/serverfarms"
+    name: "[variables('service_plan_name')]"
+    sku:
+      name: "S1"
+      tier: "Standard"
+      size: "S1"
+      family: "S"
+      capacity: 1
+    properties:
+      name: "[variables('service_plan_name')]"
+      numberOfWorkers: 1
+    apiVersion: "2015-08-01"
+    location: "[resourceGroup().location]"
+    dependsOn: []
+
+  -
+    type: "Microsoft.Storage/storageAccounts"
+    name: "[variables('storage_account_name')]"
+    sku:
+      name: "Standard_RAGRS"
+      tier: "Standard"
+    kind: "Storage"
+    tags: {}
+    properties: {}
+    apiVersion: "2016-01-01"
+    location: "[resourceGroup().location]"
+    dependsOn: []
+
+  -
+    type: "Microsoft.Web/sites"
+    kind: functionapp
+    name: "[variables('func_app_name')]"
+    properties:
+      name: "[variables('func_app_name')]"
+      serverFarmId: "[variables('service_plan_id')]"
+
+    resources:
+      -
+        type: "config"
+        name: "appsettings"
+        properties:
+          AzureWebJobsDashboard: "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storage_account_name'),';AccountKey=',listKeys(variables('storage_account_id'), variables('storage_api_version')).keys[0].value,';')]"
+          AzureWebJobsStorage: "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storage_account_name'),';AccountKey=',listKeys(variables('storage_account_id'), variables('storage_api_version')).keys[0].value,';')]"
+          FUNCTIONS_EXTENSION_VERSION: "latest"
+        apiVersion: "2016-03-01"
+        dependsOn:
+          - "[variables('func_app_id')]"
+          - "[variables('storage_account_id')]"
+
+    apiVersion: "2015-08-01"
+    location: "[resourceGroup().location]"
+    dependsOn:
+      - "[variables('service_plan_id')]"
+      - "[variables('storage_account_id')]"
+
+  -
+    type: "Microsoft.Web/sites/functions"
+    name: "[concat(variables('func_app_name'),'/', 'test')]"
+
+    properties:
+        config:
+            bindings:
+              -
+                name: req
+                webHookType: genericJson
+                direction: in
+                type: httpTrigger
+                authLevel: anonymous
+              -
+                "name": res
+                "direction": out
+                "type": http
+        files:
+            run.csx: |
+              using System.Net;
+
+              public static async Task<HttpResponseMessage> Run(HttpRequestMessage req, TraceWriter log)
+              {
+                  var content = await req.Content.ReadAsStringAsync();
+                  log.Info($"Trigger function processed: {content}");
+                  return req.CreateResponse(HttpStatusCode.OK, content);
+              }
+
+    apiVersion: "2015-08-01"
+    dependsOn:
+      - "[variables('func_app_id')]"

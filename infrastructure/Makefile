@@ -1,0 +1,30 @@
+.PHONY: all
+
+RESOURCE_GROUP=play-azure-serverless
+
+install:
+	npm install azure -g
+	azure config mode arm
+	npm install yamlxjson -g
+
+group:
+	azure group create -n $(RESOURCE_GROUP) -l "West Europe"
+
+show:
+	azure group deployment show $(RESOURCE_GROUP)
+
+list:
+	azure group deployment list $(RESOURCE_GROUP)
+
+destroy:
+	azure group deployment create -m complete -f purge.json $(RESOURCE_GROUP) default
+
+dump:
+	azure group export $(RESOURCE_GROUP) dump
+
+
+template:
+	yaml2json azuredeploy.yaml > azuredeploy.json
+
+apply: template
+	azure group deployment create -q -f azuredeploy.json -e azuredeploy.parameters.json $(RESOURCE_GROUP) default
