@@ -4,5 +4,5 @@ public static async Task<HttpResponseMessage> Run(HttpRequestMessage req, TraceW
 {
     var content = await req.Content.ReadAsStringAsync();
     log.Info($"Trigger simple function processed: {content}");
-    return req.CreateResponse(HttpStatusCode.OK, content);
+    return req.CreateResponse(HttpStatusCode.OK, "Hello from function!");
 }

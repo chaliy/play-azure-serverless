@@ -1,0 +1,9 @@
+{
+  "name": "play-azure-serverless-play",
+  "version": "1.0.0",
+  "license": "MIT",
+  "dependencies": {
+    "form-data": "^2.1.1",
+    "node-fetch": "^1.6.3"
+  }
+}
