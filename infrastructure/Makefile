@@ -28,3 +28,6 @@ template:
 
 apply: template
 	azure group deployment create -q -f azuredeploy.json -e azuredeploy.parameters.json $(RESOURCE_GROUP) default
+
+console:
+	start "" https://$(RESOURCE_GROUP)-functions.scm.azurewebsites.net/
