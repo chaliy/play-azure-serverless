@@ -1,33 +1,25 @@
 .PHONY: all
 
-RESOURCE_GROUP=play-azure-serverless
+RESOURCE_GROUP?=play-azure-serverless
 
-install:
-	npm install azure -g
-	azure config mode arm
-	npm install yamlxjson -g
-
+# Create Azure Resource Group to play in
 group:
-	azure group create -n $(RESOURCE_GROUP) -l "West Europe"
+	az group create -n $(RESOURCE_GROUP) -l "West Europe"
 
-show:
-	azure group deployment show $(RESOURCE_GROUP)
-
-list:
-	azure group deployment list $(RESOURCE_GROUP)
-
-destroy:
-	azure group deployment create -m complete -f purge.json $(RESOURCE_GROUP) default
-
-dump:
-	azure group export $(RESOURCE_GROUP) dump
-
+# If something going wrang, clean up resource group
+clean:
+	az group deployment create --mode complete \
+		--template-file purge.json \
+		--resource-group $(RESOURCE_GROUP) \
+		--name Purge
 
 template:
-	yaml2json azuredeploy.yaml > azuredeploy.json
+	cat azuredeploy.yaml | python -c "import sys, yaml, json; json.dump(yaml.load(sys.stdin), sys.stdout, indent=4)" > azuredeploy.json
 
 apply: template
-	azure group deployment create -q -f azuredeploy.json -e azuredeploy.parameters.json $(RESOURCE_GROUP) default
+	az group deployment create \
+		--resource-group $(RESOURCE_GROUP) \
+		--template-file azuredeploy.json
 
 console:
 	start "" https://$(RESOURCE_GROUP)-functions.scm.azurewebsites.net/

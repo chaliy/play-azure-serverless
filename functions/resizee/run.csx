@@ -1,13 +1,15 @@
 using ImageResizer;
-
-public static void Run(Stream blob,
-    Stream outputBlob,
-    TraceWriter log)
+using ImageResizer.ExtensionMethods;
+ 
+public static void Run(Stream blob, 
+					   Stream outputBlob, 
+					   TraceWriter log)
 {
-    log.Info("I am Resizee!");
-    var imageBuilder = ImageResizer.ImageBuilder.Current;
-    imageBuilder.Build(blob,
-        outputBlob,
-        new ResizeSettings(150, 150, FitMode.Max, null),
-        false);
+    var instructions = new Instructions
+    {
+        Width = 200,
+        Mode = FitMode.Carve,
+        Scale = ScaleMode.Both
+    };
+    ImageBuilder.Current.Build(new ImageJob(blob, outputBlob, instructions));
 }

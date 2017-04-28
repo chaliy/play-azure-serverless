@@ -1,9 +1,12 @@
 .PHONY: all
 
-publish:
-	curl -u ${PLAY_AZURE_SERVERLESS_FUNCTIONS_USER}:${PLAY_AZURE_SERVERLESS_FUNCTIONS_PASSWORD} -X PUT -k -T functions.zip https://play-azure-serverless-functions.scm.azurewebsites.net/api/zip/site/wwwroot
-	rm *.zip
+PLAY_AZURE_SERVERLESS_FUNCTIONS_USER?=$$play-azure-serverless-functions
+PLAY_AZURE_SERVERLESS_FUNCTIONS_PASSWORD?='Your Secure Password!'
 
+publish:
+	curl -v -u '${PLAY_AZURE_SERVERLESS_FUNCTIONS_USER}:${PLAY_AZURE_SERVERLESS_FUNCTIONS_PASSWORD}' -X PUT -k -T functions.zip https://play-azure-serverless-functions.scm.azurewebsites.net/api/zip/site/wwwroot
+	del *.zip
+	
 package-simple:
 	zip -r functions simple/*
 

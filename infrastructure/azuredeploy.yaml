@@ -7,7 +7,7 @@ parameters:
 
 variables:
   name: "[parameters('name')]"
-  service_plan_name: "[concat(variables('name'), '-farm')]"
+  service_plan_name: "[concat(variables('name'), '-plan')]"
   service_plan_id: "[resourceId('Microsoft.Web/serverfarms', variables('service_plan_name'))]"
   storage_account_name: "[replace(variables('name'),'-','')]"
   storage_account_id: "[resourceId('Microsoft.Storage/storageAccounts', variables('storage_account_name'))]"
@@ -36,15 +36,12 @@ resources:
   -
     type: "Microsoft.Storage/storageAccounts"
     name: "[variables('storage_account_name')]"
+    kind: Storage
     sku:
-      name: "Standard_RAGRS"
-      tier: "Standard"
-    kind: "Storage"
-    tags: {}
-    properties: {}
-    apiVersion: "2016-01-01"
+      name: Standard_LRS
+      tier: Standard
+    apiVersion: "2016-12-01"
     location: "[resourceGroup().location]"
-    dependsOn: []
 
   -
     type: "Microsoft.Web/sites"
@@ -53,7 +50,7 @@ resources:
     properties:
       name: "[variables('func_app_name')]"
       serverFarmId: "[variables('service_plan_id')]"
-
+      
     resources:
       -
         type: "config"
